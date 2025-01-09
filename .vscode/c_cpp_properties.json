@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "name": "windows-gcc-x64",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "C:/Users/Sam/Desktop/GL_Engine/include",
+        "C:/Users/Sam/Desktop/GL_Engine/include/glad",
+        "C:/Users/Sam/Desktop/GL_Engine/include/GLFW"
+      ],
+      "compilerPath": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/gcc.exe",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "windows-gcc-x64",
+      "compilerArgs": []
+    }
+  ],
+  "version": 4
+}
