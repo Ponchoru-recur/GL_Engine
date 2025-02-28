@@ -11,7 +11,7 @@
       "cwd": "c:/Users/Sam/Desktop/GL_Engine",
       "program": "${workspaceFolder}/Engine.exe",
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
+      "miDebuggerPath": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/gdb.exe",
       "setupCommands": [
         {
           "description": "Enable pretty-printing for gdb",
@@ -22,3 +22,5 @@
     }
   ]
 }
+
+// program": "${workspaceFolder}/Engine.exe

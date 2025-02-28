@@ -4,11 +4,14 @@
       "name": "windows-gcc-x64",
       "includePath": [
         "${workspaceFolder}/**",
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/headers",
+        "${workspaceFolder}/shaders",
         "C:/Users/Sam/Desktop/GL_Engine/include",
         "C:/Users/Sam/Desktop/GL_Engine/include/glad",
         "C:/Users/Sam/Desktop/GL_Engine/include/GLFW"
       ],
-      "compilerPath": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/gcc.exe",
+      "compilerPath": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/g++.exe",
       "cStandard": "c11",
       "cppStandard": "c++17",
       "intelliSenseMode": "windows-gcc-x64",

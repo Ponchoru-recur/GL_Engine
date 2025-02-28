@@ -1,0 +1,182 @@
+
+
+
+#include "config.hpp"
+// // #include "shaders.hpp"
+
+// const char* vertexShaderSource = "#version 460 core\n"
+//     "layout (location = 0) in vec3 aPos;\n"
+//     "void main(){\n"
+//     "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
+//     "}\0";
+
+// const char* fragmentShaderSource = "#version 460 core\n"
+//     "out vec4 FragColor;\n"
+//     "\n"
+//     "void main(){\n"
+//     "FragColor = vec4(0.8f, 0.5f, 0.2f, 1.0f);\n"
+//     "}\0";
+
+//An input Key that checks whether the ESCAPE key is pressed down.
+void ProcessInput(GLFWwindow* window){
+if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+    glfwSetWindowShouldClose(window, true);
+    }
+}
+
+int main(){
+
+    int width = 800;
+    int height = 600;
+
+    //Initializes the GLFW library
+    glfwInit();
+    //GLFW doesn't know what version we're using thus we write the specification needed, and for this I am using 4.6
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    //This clarifies which OpengGL we'll be using (I will be using GLFW_OPENGLE_CORE_PROFILE because the other is too hard to learn which is called Immediate mode)
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    //This is the window where everything else will be rendered
+    GLFWwindow * window = glfwCreateWindow(width, height, "Learning the hard way", NULL, NULL);
+
+    //Checking whether the making of window was successful
+    if (window == NULL){
+        std::cout << "WINDOW Failed to Initialized\n";
+        glfwTerminate();
+        return -1;
+    }
+
+    //Use the window as the current window because you need to be specific on which window you're using (which is weird)
+    glfwMakeContextCurrent(window);
+
+    //Checks and loads GLAD which is a library that basically finds the pointers for OpenGL since it is OS specific meaning each operating system has different pointer location etc
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+        std::cout << "GLAD Failed to Initialized.\n";
+        glfwTerminate();
+        return -1;
+    }
+    //This sets WHERE the area is allowed to get rendered
+    glViewport(0, 0, width, height);
+    //This is my graphics data
+    GLfloat verts[] = {
+        +0.0f, +1.0f,
+        -1.0f, -1.0f,
+        +1.0f, -1.0f
+    };
+    //My buffer name basically a place that holds states
+    GLuint myBufferID;
+    //Telling OpenGL to pass the info to myBufferID
+    glGenBuffers(1, &myBufferID);
+    //Bind the ID to the GL_ARRAY_BUFFER so whenever the ID is called it is refering to GL_ARRAY_BUFFER
+    glBindBuffer(GL_ARRAY_BUFFER, myBufferID);
+    //This function sends our verts (which you need to explicitly mention which,size,etc.)
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+    //This enables OpenGL to send the data to the RAM and the GRAPHICS CARD to send it to the graphics processing pipeline
+    glEnableVertexAttribArray(0);
+
+    //We have to describe our data since OpenGL just shoves the information insde the GPU/RAM
+    //The 0 describes the starting point of the verts. (not sure.)
+    //The 2 describes the number of elements (or floats in this case)
+    //The GL_FLOAT is mentioned because it needs to know what data type it is
+    //The GL_FALSE i dont know what its doing but stops OpenGL from doing something i dont want to do
+    //The rest, no idea.
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+
+
+    //This will keep the program open until the user press the close button then the while loop stops causing the program to close.
+    while (!glfwWindowShouldClose(window)){
+        //Check if there is Input
+        ProcessInput(window);
+
+        //Basically saying to consume the verts earlier and turn it into position of vertices
+        //The 0 represents where should i start first on the verts
+        //The 3 represents how many vertices are we rendering which is 3
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+
+        //State-setter, glClearColor sets the state of glClear
+        // glClearColor(0.2f,0.4f,0.6f,1.0f);
+        //State-user, glClear uses the state it glClearColor that was set to
+        // glClear(GL_COLOR_BUFFER_BIT);
+
+        //This swaps the buffers in the window.
+        glfwSwapBuffers(window);
+
+        //This checks the events like your keyboard or mouse, etc
+        glfwPollEvents();
+
+    }
+
+    //Destroys and Clean remnants that were allocated before
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}
+
+
+
+// #include <stdio.h>
+
+// int main() {
+
+//     //This holds the user's input
+//     int input;
+//     //This container holds the user's input thats getting subtracted each for process
+//     int container;
+//     printf("input num : ", input);
+//     scanf("%d", &input);
+
+//     printf("%d x 1000\n",  input / 1000);
+//     container = (input / 1000) * 1000;
+//     input = input - container;
+
+//     printf("%d x 500\n",  input / 500);
+//     container = (input / 500) * 500;
+//     input = input - container;
+
+//     printf("%d x 200\n",  input / 200);
+//     container = (input / 200) * 200;
+//     input = input - container;
+
+//     printf("%d x 10\n",  input / 100);
+//     container = (input / 100) * 100;
+//     input = input - container;
+
+//     printf("%d x 50\n",  input / 50);
+//     container = (input / 50) * 50;
+//     input = input - container;
+
+//     printf("%d x 20\n",  input / 20);
+//     container = (input / 20) * 20;
+//     input = input - container;
+
+//     printf("%d x 10\n",  input / 10);
+//     container = (input / 10) * 10;
+//     input = input - container;
+
+//     printf("%d x 5\n",  input / 5);
+//     container = (input / 5) * 5;
+//     input = input - container;
+
+//     printf("%d x 1\n",  input / 1);
+//     container = (input / 1) * 1;
+//     input = input - container;
+
+
+
+
+
+
+
+
+//     return 0;
+// }
+
+
+// glDrawArrays(GL_TRIANGLES, (numTris - 1) * NUM_VERTICES_PER_TRI, numTris * NUM_VERTICES_PER_TRI);
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
+
+
+        // glDrawArrays(GL_TRIANGLES, 0, verts.size());

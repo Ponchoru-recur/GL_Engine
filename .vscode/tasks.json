@@ -11,9 +11,11 @@
           "-I${workspaceFolder}/include",
           "-I${workspaceFolder}/include/glad",
           "-I${workspaceFolder}/include/GLFW",
+          "-I${workspaceFolder}/headers",
+          "-I${workspaceFolder}/shaders",
           "-L${workspaceFolder}/lib",
           "${workspaceFolder}/src/*.cpp",
-          "${workspaceFolder}/src/glad.c",
+          "C:/Users/Sam/Desktop/GL_Engine/src/glad.c",
           "-lglfw3dll",
           "-lopengl32",
           "-o",
@@ -33,4 +35,3 @@
       }
     ]
   }
-  
