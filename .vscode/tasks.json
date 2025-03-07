@@ -7,7 +7,7 @@
         "command": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/g++.exe",
         "args": [
           "-g",
-          "-std=c++17",
+          "-std=c++20",
           "-I${workspaceFolder}/include",
           "-I${workspaceFolder}/include/glad",
           "-I${workspaceFolder}/include/GLFW",

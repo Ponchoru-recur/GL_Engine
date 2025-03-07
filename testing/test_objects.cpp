@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string.h>
+#include <chrono>
+#include <thread>
 
 #define num_elememts(a) sizeof(a) / sizeof(*a)
 
@@ -55,17 +57,61 @@ class Number{
 
 };
 
+//This function pointer
+void foo(){
+    std::cout <<"printing\n";
+    //void(*func)() = foo;
+    //auto func = foo;
+}
+
+//Try, catch, throw
+void exe(){
+
+}
+
+void sleep(){
+    for (int i = 0; i < 20; i++){
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::cout << "executed : " << i << std::endl;
+    }
+
+}
+
+void felix(){
+
+
+    int num1, num2, quo, rem;
+
+    printf("Please enter first number: ");
+    scanf("%d", &num1);
+
+    printf("Please enter second number: ");
+    scanf("%d", &num2);
+
+
+
+
+    if ( num2 == 0) {
+    printf("Undefined.");
+    }
+    else {
+        if ( rem == 0) {
+            printf("This number is divisible.");
+            quo = num1 / num2;
+            rem = num1 % num2;
+        }
+
+        else {
+            printf("This is number is not divisible");
+        }
+    }
+
+}
 
 int main(){
 
-    std::cout <<"Program is running!" << std::endl;
 
-    Number a(1);
-    Number b(2);
-
-    Number c = a + b;
-
-    std::cout << c.x;
+    felix();
 
     return 0;
 }

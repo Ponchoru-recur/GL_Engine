@@ -4,31 +4,27 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "ShapeGenerator.hpp"
 
 #include <vector>
 
 
 int width = 800, height = 600;
-int num_indices = 0;
 
 // Vertex Shader Source
 const char* vertexShaderSource = "#version 460 core\n"
     "in layout (location = 0) vec3 aPos;\n"
     "in layout (location = 1) vec3 vertexColor;\n"
     ""
+    "uniform vec3 dominatingColor;\n"
+    "uniform float yFlip;"
+    ""
     "out vec3 theColor;\n"
-    "uniform mat4 modelTransformationMatrix;\n"
-    "uniform mat4 projectionMatrix;\n"
     ""
     "void main() {\n"
-    "   vec4 v = vec4(aPos, 1.0);\n"
-    "   vec4 newPosition = modelTransformationMatrix * v;\n"
-    "   vec4 projectedPosition = projectionMatrix * newPosition;\n"
-    "   gl_Position = projectedPosition;\n"
-    ""
-    "   theColor = vertexColor;\n"
+    "   gl_Position = vec4(aPos, 1.0);\n"
+    "   gl_Position.y = gl_Position.y * yFlip;"
+    "   theColor = dominatingColor;\n"
     "}\0";
 
 // Fragment Shader Source
@@ -154,7 +150,6 @@ int main() {
     glGenBuffers(1, &indexBufferID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tri.indexBufferSize(), tri.indices, GL_STATIC_DRAW);
-    num_indices = tri.numIndices;
     tri.cleanup();
 
     // Describe Vertex Data
@@ -174,8 +169,8 @@ int main() {
     // Unbind Buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
     //Main Render Loop
+
     while (!glfwWindowShouldClose(window)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -185,21 +180,25 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+         //Uniform data does not vary and it is the same for every vertex
+        glm::vec3 dominatingColor(0.0f, 1.0f, 0.0f);
+        //This looks for the uniform ID in the vertex shader
+        GLint dominatingColorUniformLocation = glGetUniformLocation(shaderProgram, "dominatingColor");
+        GLint yFlipUniformLocation = glGetUniformLocation(shaderProgram, "yFlip");
+
         //Render Triangle
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
+        //Im putting the RGB color to the location of dominatingcolor
+        glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+        glUniform1f(yFlipUniformLocation, 1.0f);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 
-        glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-        glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(width) / float(height), 0.1f, 10.0f);
-
-        GLint modeltransformationMatrixLocation = glGetUniformLocation(shaderProgram, "modelTransformationMatrix");
-        GLint projectionMatrixLocation = glGetUniformLocation(shaderProgram, "projectionMatrix");
-
-        glUniformMatrix4fv(modeltransformationMatrixLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-        glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
-
-        glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0);
-        glBindVertexArray(0);
+        dominatingColor.r = 1;
+        dominatingColor.g = 0;
+        glUniform3fv(dominatingColorUniformLocation, 1, &dominatingColor[0]);
+        glUniform1f(yFlipUniformLocation, -1.0f);
+        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

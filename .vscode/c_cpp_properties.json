@@ -13,7 +13,7 @@
       ],
       "compilerPath": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/g++.exe",
       "cStandard": "c11",
-      "cppStandard": "c++17",
+      "cppStandard": "c++20",
       "intelliSenseMode": "windows-gcc-x64",
       "compilerArgs": []
     }
