@@ -10,21 +10,23 @@
 
 #include "ShapeGenerator.hpp"
 
-int width = 800, height = 600;
+int width = 1800, height = 700;
 int num_indices = 0;
+
+// "layout (location = 2) in float offset;\n"
 
 // Vertex Shader Source
 const char* vertexShaderSource =
     "#version 460 core\n"
-    "in layout (location = 0) vec3 aPos;\n"
-    "in layout (location = 1) vec3 vertexColor;\n"
+    "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec3 vertexColor;\n"
+    "layout (location = 2) in mat4 fullTransformMatrix;\n"
     ""
     "out vec3 theColor;\n"
-    "uniform mat4 fullTransformMatrix;\n"
     ""
     ""
     "void main() {\n"
-    "   gl_Position = fullTransformMatrix * vec4(aPos, 1.0);\n"
+    "   gl_Position = fullTransformMatrix * vec4(position, 1.0);\n"
     ""
     "   theColor = vertexColor;\n"
     "}\0";
@@ -41,9 +43,9 @@ const char* fragmentShaderSource =
     "    FragColor = vec4(theColor, 0.5f);\n"
     "}\0";
 
-float x_offset = 0;
+float x_offset = +1.0f;
 float y_offset = 0;
-float x_rotate_offset = 54.0f;
+float x_rotate_offset = 0.0f;
 
 // Input Handling
 void ProcessInput(GLFWwindow* window) {
@@ -153,6 +155,8 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    num_indices = tri.numIndices;
+
     // Create VAO (Important!)
     // This stores how to interpret the vertices else it forgets and probably
     // will show a weird behavior.
@@ -160,39 +164,55 @@ int main() {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
-    // Create VBO (Vertex Buffer Object)
+    // Create VBO (Vertex Buffer Object) this for the position of triangles
     GLuint VertexBufferID;
     glGenBuffers(1, &VertexBufferID);
     glBindBuffer(GL_ARRAY_BUFFER, VertexBufferID);
     glBufferData(GL_ARRAY_BUFFER, tri.vertexBufferSize(), tri.vertices,
                  GL_STATIC_DRAW);
 
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+
     GLuint indexBufferID;
     glGenBuffers(1, &indexBufferID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tri.indexBufferSize(), tri.indices,
                  GL_STATIC_DRAW);
-    num_indices = tri.numIndices;
-    tri.cleanup();
 
-    // Describe Vertex Data
-    // The 0 describes the starting point of the verts. (location of the verts.)
-    // The 2 describes the number of components (x,y)
-    // What datatype is the component (GL_FLOAT)
-    // The GL_FALSE means don't tamper with the fucking spell
-    // The 2 * sizeof(float) is i have no fucking idea either
-    //(void*)0?????
-    // glEnableVertexAttribArray(0); enables OpenGL to send the data to the RAM
-    // and the GRAPHICS CARD to send it to the graphics processing pipeline For
-    // attribute (zero) expect (two) (GL_FLOAT)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                          (char*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(1);
+
+    GLuint fullTransformationMatrixBufferID;
+    glGenBuffers(1, &fullTransformationMatrixBufferID);
+    glBindBuffer(GL_ARRAY_BUFFER, fullTransformationMatrixBufferID);
+
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(width) / float(height), 0.1f, 10.0f);
+    glm::mat4 fullTransforms[] = {
+        // Cube 1
+        projectionMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset - 2.0f, y_offset, -3.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(x_rotate_offset - 36.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
+        projectionMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset, y_offset, -3.76f)) * glm::rotate(glm::mat4(1.0f), glm::radians(x_rotate_offset - 126.0f), glm::vec3(0.0f, 1.0f, 0.0f))};
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float) * 0));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float) * 4));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float) * 8));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float) * 12));
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
+    glVertexAttribDivisor(2, 1);
+    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+
+    tri.cleanup();
 
     // Unbind Buffers
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     // Main Render Loop
@@ -209,31 +229,10 @@ int main() {
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
 
-        // Cube 1
-
-        // This area calculates how the object will move, rotate and be projected on the screen.
-        glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(width) / float(height), 0.1f, 10.0f);
-        glm::mat4 translationMatrix = glm::translate(projectionMatrix, glm::vec3(x_offset, y_offset, -4.0f));
-        glm::mat4 fulltransformMatrix = glm::rotate(translationMatrix, glm::radians(x_rotate_offset), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        // Goes to the shader program and finds fullTransformMatrix
-        GLint fullTranslationMatrixLocation = glGetUniformLocation(shaderProgram, "fullTransformMatrix");
-        // This function sends the data to the vertexShader
-        glUniformMatrix4fv(fullTranslationMatrixLocation, 1, GL_FALSE, &fulltransformMatrix[0][0]);
+        // // Cube 1
         // Draw the triangle
-        glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0);
-
-        // Cube 2
-
-        translationMatrix = glm::translate(projectionMatrix, glm::vec3(x_offset - 2.0f, y_offset, -4.0f));
-        fulltransformMatrix = glm::rotate(translationMatrix, glm::radians(x_rotate_offset - 20), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        // Goes to the shader program and finds fullTransformMatrix
-        fullTranslationMatrixLocation = glGetUniformLocation(shaderProgram, "fullTransformMatrix");
-        // This function sends the data to the vertexShader
-        glUniformMatrix4fv(fullTranslationMatrixLocation, 1, GL_FALSE, &fulltransformMatrix[0][0]);
-        // Draw the triangle
-        glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0);
+        // glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0);
+        glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0, 2);
 
         glBindVertexArray(0);
 
@@ -244,6 +243,8 @@ int main() {
     // **Cleanup**
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VertexBufferID);
+    glDeleteBuffers(1, &indexBufferID);
+    // glDeleteBuffers(1, &fullTransformationMatrixBufferID);
     glDeleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
@@ -259,3 +260,14 @@ int main() {
     which will have a new position which is the projected space (A flat thing)
 
 */
+
+// Describe Vertex Data
+// The 0 describes which location will it go to
+// The 2 describes the number of components (x,y)
+// What datatype is the component (GL_FLOAT)
+// The GL_FALSE means don't tamper with the fucking spell
+// The 2 * sizeof(float) is i have no fucking idea either
+//(void*)0?????
+// glEnableVertexAttribArray(0); enables OpenGL to send the data to the RAM
+// and the GRAPHICS CARD to send it to the graphics processing pipeline For
+// attribute (zero) expect (two) (GL_FLOAT)

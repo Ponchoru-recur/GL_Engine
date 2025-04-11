@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <stdio.h>
 
 int counter = 0;
 std::mutex mtx;
@@ -15,14 +16,6 @@ void foo(int count, std::string name) {
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
-
-    std::thread t1(foo, 1000, "Banana");
-    std::thread t2(foo, 1000, "Apple");
-
-    t1.join();
-    t2.join();
-
-    std::cout << counter;
 
     auto end = std::chrono::high_resolution_clock::now();
 
