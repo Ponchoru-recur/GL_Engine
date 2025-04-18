@@ -9,8 +9,9 @@
 #include <vector>
 
 #include "ShapeGenerator.hpp"
+#include "camera.hpp"
 
-int width = 1800, height = 700;
+int width = 1000, height = 700;
 int num_indices = 0;
 
 // "layout (location = 2) in float offset;\n"
@@ -22,11 +23,11 @@ const char* vertexShaderSource =
     "layout (location = 1) in vec3 vertexColor;\n"
     "layout (location = 2) in mat4 fullTransformMatrix;\n"
     ""
+    "uniform vec3 offsets;\n"
     "out vec3 theColor;\n"
     ""
-    ""
     "void main() {\n"
-    "   gl_Position = fullTransformMatrix * vec4(position, 1.0);\n"
+    "   gl_Position = fullTransformMatrix * vec4(position.x + offsets.x, position.y + offsets.y, position.z + offsets.z, 1.0);\n"
     ""
     "   theColor = vertexColor;\n"
     "}\0";
@@ -45,30 +46,38 @@ const char* fragmentShaderSource =
 
 float x_offset = +1.0f;
 float y_offset = 0;
-float x_rotate_offset = 0.0f;
+float z_offset = 0.0f;
 
 // Input Handling
 void ProcessInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
         y_offset += 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    } else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
         y_offset -= 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        x_offset += 0.1f;
     } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        x_offset += 0.1f;
+    } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         x_offset -= 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        x_rotate_offset -= 1.0f;
-    } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        x_rotate_offset += 1.0f;
+    } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        z_offset -= 0.1f;
+    } else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        z_offset += 0.1f;
     }
 }
 
+double mouse_x, mouse_y;
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    glm::vec2 newMousePos(xpos, ypos);
+    mouse_x = newMousePos.x;
+    mouse_y = newMousePos.y;
+}
+
 int main() {
-    // Initialize GLFW
+    // Initialize GLFW5
     glfwInit();
     // GLFW doesn't know what version we're using thus we write the
     // specification needed, and for this I am using 4.6
@@ -97,6 +106,9 @@ int main() {
     // Checks and loads GLAD which is a library that basically finds the
     // pointers for OpenGL since it is OS specific meaning each operating system
     // has different pointer location etc
+
+    glfwSetCursorPosCallback(window, mouse_callback);
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "GLAD Failed to Initialize\n";
         glfwTerminate();
@@ -108,6 +120,7 @@ int main() {
 
     // FIXME:
     ShapeData tri = ShapeGenerator::makeTriangle();
+    Camera camera;
 
     // Compile Vertex Shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -171,8 +184,14 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, tri.vertexBufferSize(), tri.vertices,
                  GL_STATIC_DRAW);
 
+    // Position vertex
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
+
+    // Color vertex
+    // glVertexAttrib3f(1, 0, 1, 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
 
     GLuint indexBufferID;
     glGenBuffers(1, &indexBufferID);
@@ -180,20 +199,11 @@ int main() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, tri.indexBufferSize(), tri.indices,
                  GL_STATIC_DRAW);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3));
-    glEnableVertexAttribArray(1);
-
     GLuint fullTransformationMatrixBufferID;
     glGenBuffers(1, &fullTransformationMatrixBufferID);
     glBindBuffer(GL_ARRAY_BUFFER, fullTransformationMatrixBufferID);
 
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(width) / float(height), 0.1f, 10.0f);
-    glm::mat4 fullTransforms[] = {
-        // Cube 1
-        projectionMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset - 2.0f, y_offset, -3.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(x_rotate_offset - 36.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
-        projectionMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset, y_offset, -3.76f)) * glm::rotate(glm::mat4(1.0f), glm::radians(x_rotate_offset - 126.0f), glm::vec3(0.0f, 1.0f, 0.0f))};
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * 2, 0, GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float) * 0));
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float) * 4));
@@ -211,27 +221,37 @@ int main() {
     tri.cleanup();
 
     // Unbind Buffers
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     // Main Render Loop
     while (!glfwWindowShouldClose(window)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
 
         ProcessInput(window);
+
+        // std::cout << "x : " << mouse_x << " y: " << mouse_y << "\n";
 
         // Clears the color and depth
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // GLuint offsetLocation = glGetUniformLocation(shaderProgram, "offsets");
+        // glUniform3f(offsetLocation, x_offset, y_offset, z_offset);
+
         // Render Triangle
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
 
-        // // Cube 1
-        // Draw the triangle
-        // glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0);
+        camera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
+        glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(width) / float(height), 0.1f, 10.0f);
+        glm::mat4 fullTransforms[] = {
+            // Cube 1 (Model to world matrix)
+            projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset - 2.0f, y_offset, z_offset - 3.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(36.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
+            projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset, y_offset, z_offset - 3.76f)) * glm::rotate(glm::mat4(1.0f), glm::radians(126.0f), glm::vec3(0.0f, 1.0f, 0.0f))};
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_DYNAMIC_DRAW);
+
         glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0, 2);
 
         glBindVertexArray(0);
@@ -241,9 +261,11 @@ int main() {
     }
 
     // **Cleanup**
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VertexBufferID);
     glDeleteBuffers(1, &indexBufferID);
+    glDeleteBuffers(1, &fullTransformationMatrixBufferID);
     // glDeleteBuffers(1, &fullTransformationMatrixBufferID);
     glDeleteProgram(shaderProgram);
 
