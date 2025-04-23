@@ -6,13 +6,24 @@
 class Camera {
    public:
     Camera();
+    // Camera movement from up to down.
     void mouseUpdate(const glm::vec2 &newMousePosition);
     glm::mat4 getWorldToViewMatrix() const;
 
+    // movement functions
+
+    void moveForward();
+    void moveBackward();
+    void strafeLeft();
+    void strafeRight();
+    void moveUp();
+    void moveDown();
+
    private:
+    const float MOVEMENT_SPEED = 0.1f;
     glm::vec3 position;       // Positions where the camera stays in the grid
     glm::vec3 viewDirection;  // Where the camera is looking at
-    const glm::vec3 UP;
+    const glm::vec3 UP; // This controls how tiled your camera is
     glm::vec2 oldMousePosition;
 };
 

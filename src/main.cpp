@@ -14,8 +14,6 @@
 int width = 1000, height = 700;
 int num_indices = 0;
 
-// "layout (location = 2) in float offset;\n"
-
 // Vertex Shader Source
 const char* vertexShaderSource =
     "#version 460 core\n"
@@ -50,22 +48,6 @@ float z_offset = 0.0f;
 
 // Input Handling
 void ProcessInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, true);
-    }
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        y_offset += 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        y_offset -= 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        x_offset += 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        x_offset -= 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        z_offset -= 0.1f;
-    } else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        z_offset += 0.1f;
-    }
 }
 
 double mouse_x, mouse_y;
@@ -228,7 +210,23 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
 
-        ProcessInput(window);
+        // This is the keypress events
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, true);
+        }
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            camera.moveUp();
+        } else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            camera.moveDown();
+        } else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            camera.moveForward();
+        } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            camera.moveBackward();
+        } else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            camera.strafeLeft();
+        } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            camera.strafeRight();
+        }
 
         // std::cout << "x : " << mouse_x << " y: " << mouse_y << "\n";
 

@@ -7,15 +7,18 @@
 int counter = 0;
 std::mutex mtx;
 
-void foo(int count, std::string name) {
-    for (int i = 0; i < count; i++) {
-        // std::lock_guard<std::mutex> lock(mtx);
-        ++counter;
-    }
+void foo() {
+    static int n = 0;
+    n++;
+    printf("%d\n", n);
 }
 
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
+
+    // Code here
+    foo();
+    foo();
 
     auto end = std::chrono::high_resolution_clock::now();
 

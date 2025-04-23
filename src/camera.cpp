@@ -1,7 +1,5 @@
 #include "camera.hpp"
 
-#include <iostream>
-
 Camera::Camera() : viewDirection(0.0f, 0.0f, -1.0f), UP(0.0f, 1.0f, 0.0f) {
 }
 
@@ -18,9 +16,31 @@ void Camera::mouseUpdate(const glm::vec2 &newMousePosition) {
         oldMousePosition = newMousePosition;
         return;
     }
-    // Horizontal
+    // Horizontal or left to right
     viewDirection = glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(mouse_sense_x), UP)) * viewDirection;
+    // vertical or up and down
     glm::vec3 toRotateAround = glm::cross(viewDirection, UP);
     viewDirection = glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(mouse_sense_y), toRotateAround)) * viewDirection;
     oldMousePosition = newMousePosition;
+}
+
+void Camera::moveForward() {
+    position += MOVEMENT_SPEED * viewDirection;
+}
+void Camera::moveBackward() {
+    position += -MOVEMENT_SPEED * viewDirection;
+}
+void Camera::strafeLeft() {
+    glm::vec3 StrafeDirection = glm::cross(viewDirection, UP);
+    position += -MOVEMENT_SPEED * StrafeDirection;
+}
+void Camera::strafeRight() {
+    glm::vec3 StrafeDirection = glm::cross(viewDirection, UP);
+    position += MOVEMENT_SPEED * StrafeDirection;
+}
+void Camera::moveUp() {
+    position += MOVEMENT_SPEED * UP;
+}
+void Camera::moveDown() {
+    position += -MOVEMENT_SPEED * UP;
 }
