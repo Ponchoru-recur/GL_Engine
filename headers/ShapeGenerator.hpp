@@ -2,6 +2,7 @@
 #include "ShapeData.hpp"
 
 class ShapeGenerator {
-    public:
-        static ShapeData makeTriangle();
+   public:
+    static ShapeData makeCube();
+    static ShapeData makeArrow();
 };

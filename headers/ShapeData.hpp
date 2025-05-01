@@ -9,7 +9,7 @@ struct ShapeData {
     Vertex* vertices;
 
     GLuint numVertices;
-    // This takes what are inside the indices example {0,1,2}
+    // This will give the pointer location of the array of indices for GL_ELEMENT_ARRAY.
     GLushort* indices;
     // This gets how many elements are inside the indices example 3 because {0,1,2} = 3
     GLuint numIndices;

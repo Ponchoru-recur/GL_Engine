@@ -46,6 +46,10 @@ float x_offset = +1.0f;
 float y_offset = 0;
 float z_offset = 0.0f;
 
+float x_rotate = 0.0f;
+float y_rotate = 0.0f;
+float z_rotate = 0.0f;
+
 // Input Handling
 void ProcessInput(GLFWwindow* window) {
 }
@@ -101,7 +105,7 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     // FIXME:
-    ShapeData tri = ShapeGenerator::makeTriangle();
+    ShapeData tri = ShapeGenerator::makeArrow();
     Camera camera;
 
     // Compile Vertex Shader
@@ -214,9 +218,9 @@ int main() {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         }
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
             camera.moveUp();
-        } else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        } else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
             camera.moveDown();
         } else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             camera.moveForward();
@@ -226,6 +230,12 @@ int main() {
             camera.strafeLeft();
         } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             camera.strafeRight();
+
+            // Rotational keys
+        } else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            x_rotate += 1.0f;
+        } else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+            y_rotate += 1.0f;
         }
 
         // std::cout << "x : " << mouse_x << " y: " << mouse_y << "\n";
@@ -244,13 +254,13 @@ int main() {
         camera.mouseUpdate(glm::vec2(mouse_x, mouse_y));
         glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(width) / float(height), 0.1f, 10.0f);
         glm::mat4 fullTransforms[] = {
-            // Cube 1 (Model to world matrix)
-            projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset - 2.0f, y_offset, z_offset - 3.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(36.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
+            // Cube 1 (Model to world matrix) - (World to view Matrix) it is the matrix that manipulates all objects.                                                                                                                                 //Added a rotational for the Y axis specifically for the first arrow
+            projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset - 2.0f, y_offset, z_offset - 3.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(x_rotate + 36.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), glm::radians(y_rotate), glm::vec3(0.0f, 1.0f, 0.0f)),
             projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(x_offset, y_offset, z_offset - 3.76f)) * glm::rotate(glm::mat4(1.0f), glm::radians(126.0f), glm::vec3(0.0f, 1.0f, 0.0f))};
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_DYNAMIC_DRAW);
 
-        glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0, 2);
+        glDrawElementsInstanced(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, 0, sizeof(fullTransforms) / sizeof(*fullTransforms));
 
         glBindVertexArray(0);
 
