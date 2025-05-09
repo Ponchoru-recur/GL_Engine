@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": true,
       "cwd": "c:/Users/Sam/Desktop/GL_Engine",
-      "program": "${workspaceFolder}/Engine.exe",
+      "program": "${workspaceFolder}/main.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "C:/MinGW/x86_64-14.2.0-release-posix-seh-msvcrt-rt_v12-rev0/mingw64/bin/gdb.exe",
       "setupCommands": [

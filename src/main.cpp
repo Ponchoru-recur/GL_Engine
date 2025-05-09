@@ -171,7 +171,7 @@ int main() {
                  GL_STATIC_DRAW);
 
     // Position vertex
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float) , 0);
     glEnableVertexAttribArray(0);
 
     // Color vertex
